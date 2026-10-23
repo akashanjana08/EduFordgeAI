@@ -1,0 +1,6 @@
+{
+  "name": "EduForge AI — Question Paper Generator",
+  "description": "Production-grade AI Question Paper Generator powered by Google Gemini with custom school branding, template extraction, marks validation, and printable A4 PDF & Answer Key export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@layer base {
+  html,
+  body {
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  h1,
+  h2,
+  .font-display {
+    font-family: "Fraunces", Georgia, serif;
+    text-wrap: balance;
+  }
+
+  .font-mono,
+  .tabular-nums {
+    font-family: "JetBrains Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Subtle horizontal scrollbar styling for responsive nav and tables */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

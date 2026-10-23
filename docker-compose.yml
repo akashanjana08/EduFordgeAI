@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  question-paper-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-question-paper-generator
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.1-flash-lite-preview}
+      - GEMINI_TEMPERATURE=${GEMINI_TEMPERATURE:-0.3}
+      - GEMINI_MAX_OUTPUT_TOKENS=${GEMINI_MAX_OUTPUT_TOKENS:-8192}
+      - MAX_UPLOAD_SIZE_MB=${MAX_UPLOAD_SIZE_MB:-10}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./app/templates/custom:/workspace/app/templates/custom
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true

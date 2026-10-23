@@ -1,0 +1,34 @@
+{
+  "templates": [
+    {
+      "template_id": "template_1_simple",
+      "template_name": "Template 1 - Simple School Format",
+      "page_size": "A4"
+    },
+    {
+      "template_id": "template_2_modern",
+      "template_name": "Template 2 - Modern School Format",
+      "page_size": "A4"
+    },
+    {
+      "template_id": "template_3_cbse",
+      "template_name": "Template 3 - CBSE Style",
+      "page_size": "A4"
+    },
+    {
+      "template_id": "template_4_compact",
+      "template_name": "Template 4 - Compact Format",
+      "page_size": "A4"
+    },
+    {
+      "template_id": "template_5_header_section",
+      "template_name": "Template 5 - Header + Section Based",
+      "page_size": "A4"
+    },
+    {
+      "template_id": "template_6_two_column",
+      "template_name": "Template 6 - Two Column Format",
+      "page_size": "A4"
+    }
+  ]
+}

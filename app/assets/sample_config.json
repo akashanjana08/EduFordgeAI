@@ -1,0 +1,30 @@
+{
+  "school_details": {
+    "school_name": "St. Xavier's International Academy",
+    "school_address": "Sector 14, Knowledge Park, New Delhi",
+    "academic_session": "2026-2027",
+    "exam_name": "Annual Board Examination",
+    "term": "Term II",
+    "exam_date": "2026-10-15",
+    "time_duration": "3 Hours"
+  },
+  "class_name": "Grade 10",
+  "subject": "Mathematics",
+  "maximum_marks": 80,
+  "topics": [
+    "Real Numbers",
+    "Polynomials",
+    "Linear Equations",
+    "Quadratic Equations",
+    "Arithmetic Progression",
+    "Triangles",
+    "Statistics",
+    "Probability"
+  ],
+  "question_types": [
+    { "type": "mcq", "count": 20, "marks_per_question": 1, "difficulty": "Easy" },
+    { "type": "subjective", "count": 5, "marks_per_question": 2, "difficulty": "Moderate" },
+    { "type": "numeric", "count": 5, "marks_per_question": 4, "difficulty": "Moderate" },
+    { "type": "application", "count": 3, "marks_per_question": 10, "difficulty": "Difficult" }
+  ]
+}
