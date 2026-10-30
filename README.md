@@ -109,6 +109,23 @@ npm run build
 NODE_ENV=production npm start
 ```
 
+### Render deployment
+
+Deploy this repository as a **Web Service**, not a Static Site. The service must
+run the Express server after building the Vite frontend:
+
+```text
+Build Command: npm ci && npm run build
+Start Command: npm start
+Environment: Node
+NODE_ENV: production
+```
+
+Render provides the `PORT` environment variable automatically; the server uses
+that value. The `/api/health` endpoint should return
+`{"ok":true,"service":"eduforge-ai"}` after deployment. The repository also
+includes `render.yaml` with the same Web Service configuration.
+
 ---
 
 ## 3. Local Installation (Python + Streamlit Application)

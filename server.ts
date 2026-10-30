@@ -44,6 +44,10 @@ mountAuthAndSubscriptionRoutes(app);
 
 const PORT = Number(process.env.PORT) || 3000;
 
+app.get("/api/health", (_req, res) => {
+  res.json({ ok: true, service: "eduforge-ai" });
+});
+
 function getGenAIClient(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
