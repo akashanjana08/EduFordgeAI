@@ -11,6 +11,7 @@ import {
   User,
 } from "lucide-react";
 import { AccessEvaluation, UserProfile } from "../types";
+import { readApiJson } from "../services/api";
 
 interface ProfileViewProps {
   user: UserProfile;
@@ -56,7 +57,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         headers: authHeaders,
         body: JSON.stringify({ email: emailInput.trim() }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to update profile.");
       }
@@ -89,7 +90,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           newPassword,
         }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to change password.");
       }

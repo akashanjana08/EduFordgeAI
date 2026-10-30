@@ -23,6 +23,7 @@ import {
   UserRole,
   UserSubscription,
 } from "../types";
+import { readApiJson } from "../services/api";
 
 interface AdminOwnerConsoleViewProps {
   currentUser: UserProfile;
@@ -78,7 +79,7 @@ export const AdminOwnerConsoleView: React.FC<AdminOwnerConsoleViewProps> = ({
       const res = await fetch("/api/admin/overview", {
         headers: authHeaders,
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to load administrative overview.");
       }
@@ -111,7 +112,7 @@ export const AdminOwnerConsoleView: React.FC<AdminOwnerConsoleViewProps> = ({
         headers: authHeaders,
         body: JSON.stringify(updates),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to update user.");
       }
@@ -137,7 +138,7 @@ export const AdminOwnerConsoleView: React.FC<AdminOwnerConsoleViewProps> = ({
         headers: authHeaders,
         body: JSON.stringify({ userId, planId, status }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to assign subscription.");
       }
@@ -161,7 +162,7 @@ export const AdminOwnerConsoleView: React.FC<AdminOwnerConsoleViewProps> = ({
           max_questions_per_paper: editPlanMaxQ,
         }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to update plan.");
       }
@@ -197,7 +198,7 @@ export const AdminOwnerConsoleView: React.FC<AdminOwnerConsoleViewProps> = ({
           ],
         }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to create subscription plan.");
       }

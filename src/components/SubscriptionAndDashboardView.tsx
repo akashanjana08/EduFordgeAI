@@ -20,6 +20,7 @@ import {
   UsageRecord,
   UserProfile,
 } from "../types";
+import { readApiJson } from "../services/api";
 
 interface SubscriptionAndDashboardViewProps {
   activeSubView: "dashboard" | "subscription";
@@ -79,7 +80,7 @@ export const SubscriptionAndDashboardView: React.FC<
           billingCycle,
         }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Could not initiate checkout.");
       }
@@ -102,7 +103,7 @@ export const SubscriptionAndDashboardView: React.FC<
         headers: authHeaders,
         body: JSON.stringify(checkoutOrder.gatewayWebhookPayload),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Payment webhook verification failed.");
       }
@@ -127,7 +128,7 @@ export const SubscriptionAndDashboardView: React.FC<
         method: "POST",
         headers: authHeaders,
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to cancel subscription.");
       }
@@ -157,7 +158,7 @@ export const SubscriptionAndDashboardView: React.FC<
             planCode || accessEvaluation.plan?.code || "BASIC",
         }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Could not update subscription state.");
       }

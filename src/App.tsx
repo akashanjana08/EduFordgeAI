@@ -46,6 +46,7 @@ import {
   UsageRecord,
   UserProfile,
 } from "./types";
+import { readApiJson } from "./services/api";
 import {
   DEFAULT_LOGO_SVG_DATA_URL,
   PREDEFINED_TEMPLATES,
@@ -177,7 +178,7 @@ export default function App() {
     try {
       const res = await fetch("/api/public/plans");
       if (res.ok) {
-        const data = await res.json();
+        const data = await readApiJson(res);
         setPublicPlans(data.plans || []);
       }
     } catch {
@@ -207,7 +208,7 @@ export default function App() {
         setAuthUser(null);
         setAccessEvaluation(null);
       } else {
-        const data = await res.json();
+        const data = await readApiJson(res);
         setAuthUser(data.user);
         if (data.csrfToken) {
           setCsrfToken(data.csrfToken);
@@ -712,7 +713,7 @@ export default function App() {
           llmConfig,
         }),
       });
-      const data = await response.json();
+      const data = await readApiJson(response);
       if (!response.ok) {
         if (data.accessEvaluation) {
           setAccessEvaluation(data.accessEvaluation);
@@ -768,7 +769,7 @@ export default function App() {
           llmConfig,
         }),
       });
-      const data = await response.json();
+      const data = await readApiJson(response);
       if (!response.ok) {
         if (data.accessEvaluation) {
           setAccessEvaluation(data.accessEvaluation);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Code2, Copy, Check, Download, X } from "lucide-react";
+import { readApiJson } from "../services/api";
 
 interface PythonSourceModalProps {
   isOpen: boolean;
@@ -14,12 +15,20 @@ export const PythonSourceModal: React.FC<PythonSourceModalProps> = ({
   const [selectedPath, setSelectedPath] = useState<string>("app/app.py");
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen || Object.keys(files).length > 0) return;
     setLoading(true);
+    setError(null);
     fetch("/api/python-project")
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await readApiJson(res);
+        if (!res.ok) {
+          throw new Error(data.error || "Could not load the Python project.");
+        }
+        return data;
+      })
       .then((data) => {
         if (data.files) {
           setFiles(data.files);
@@ -29,7 +38,11 @@ export const PythonSourceModal: React.FC<PythonSourceModalProps> = ({
           }
         }
       })
-      .catch(() => {})
+      .catch((err: unknown) => {
+        setError(
+          err instanceof Error ? err.message : "Could not load the Python project."
+        );
+      })
       .finally(() => setLoading(false));
   }, [isOpen, files, selectedPath]);
 
@@ -118,6 +131,11 @@ export const PythonSourceModal: React.FC<PythonSourceModalProps> = ({
           </div>
 
           <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-slate-950 text-slate-100">
+            {error && (
+              <p role="alert" className="px-4 py-3 text-sm text-red-300">
+                {error}
+              </p>
+            )}
             <div className="px-3 sm:px-4 py-2 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 bg-slate-900/80">
               <span className="text-xs font-mono text-sky-400 truncate max-w-[200px] sm:max-w-none">
                 {selectedPath}

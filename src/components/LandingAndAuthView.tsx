@@ -22,6 +22,7 @@ import {
   SubscriptionPlan,
   UserProfile,
 } from "../types";
+import { readApiJson } from "../services/api";
 
 export type AuthScreenMode =
   | "landing"
@@ -128,7 +129,7 @@ export const LandingAndAuthView: React.FC<LandingAndAuthViewProps> = ({
           password: loginPassword,
         }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Invalid credentials.");
       }
@@ -161,7 +162,7 @@ export const LandingAndAuthView: React.FC<LandingAndAuthViewProps> = ({
           initialPlanCode: regInitialPlan,
         }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Registration failed.");
       }
@@ -189,7 +190,7 @@ export const LandingAndAuthView: React.FC<LandingAndAuthViewProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: forgotIdentifier.trim() }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Could not process request.");
       }
@@ -219,7 +220,7 @@ export const LandingAndAuthView: React.FC<LandingAndAuthViewProps> = ({
           newPassword: newPasswordInput,
         }),
       });
-      const data = await res.json();
+      const data = await readApiJson(res);
       if (!res.ok) {
         throw new Error(data.error || "Failed to reset password.");
       }

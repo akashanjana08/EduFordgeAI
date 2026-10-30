@@ -4,7 +4,7 @@
       "id": "usr_owner_001",
       "username": "Akash00894",
       "email": "akash00894@eduforge.ai",
-      "password_hash": "$2b$12$/3.uGI4KE4fx1vFcEDFYbuevYrAu64G9DNGe9fb5T3bE4fFFJJhhi",
+      "password_hash": "$2b$12$6f.qf.hkvWAqSXwORp29auRVJ8s7wutACN0X.yGbI7vZuN5mNjpw.",
       "role": "OWNER",
       "status": "ACTIVE",
       "failed_login_attempts": 0,
@@ -12,7 +12,7 @@
       "reset_token_hash": null,
       "reset_token_expires_at": null,
       "created_at": "2026-09-01T08:00:00.000Z",
-      "updated_at": "2026-10-21T15:32:35.850Z"
+      "updated_at": "2026-10-30T11:56:41.992Z"
     },
     {
       "id": "usr_admin_002",
@@ -442,6 +442,42 @@
   ],
   "audit_logs": [
     {
+      "id": "aud_6727af204e29",
+      "actor_user_id": "usr_owner_001",
+      "actor_username": "Akash00894",
+      "actor_role": "OWNER",
+      "action": "USER_LOGIN_SUCCESS",
+      "target_type": "Users",
+      "target_id": "usr_owner_001",
+      "details": "Authenticated Akash00894 with role=OWNER (OWNER subscription exemption active).",
+      "ip_address": "127.0.0.1",
+      "created_at": "2026-10-30T11:56:41.995Z"
+    },
+    {
+      "id": "aud_99f50f0642fe",
+      "actor_user_id": "usr_owner_001",
+      "actor_username": "Akash00894",
+      "actor_role": "OWNER",
+      "action": "USER_LOGOUT",
+      "target_type": "Sessions",
+      "target_id": "ses_6e3cab26ba49",
+      "details": "User Akash00894 logged out.",
+      "ip_address": null,
+      "created_at": "2026-10-30T11:56:23.252Z"
+    },
+    {
+      "id": "aud_1c87215b5a99",
+      "actor_user_id": "usr_owner_001",
+      "actor_username": "Akash00894",
+      "actor_role": "OWNER",
+      "action": "USER_LOGIN_SUCCESS",
+      "target_type": "Users",
+      "target_id": "usr_owner_001",
+      "details": "Authenticated Akash00894 with role=OWNER (OWNER subscription exemption active).",
+      "ip_address": "127.0.0.1",
+      "created_at": "2026-10-30T11:55:27.305Z"
+    },
+    {
       "id": "aud_0abefa9710c5",
       "actor_user_id": "usr_owner_001",
       "actor_username": "Akash00894",
@@ -760,14 +796,14 @@
       "created_at": "2026-10-21T15:23:48.302Z"
     },
     {
-      "id": "ses_cc087a73728c",
+      "id": "ses_27db0b364606",
       "user_id": "usr_owner_001",
-      "token_hash": "de20bb0d4c4d689323939c3d5625468b1e74e15c6cdfa8e7f7e8a7d344f10e11",
-      "csrf_token": "df6f8a88a4b73918686426f55b9a4b9f979450461f7bd399",
-      "expires_at": "2026-10-22T15:32:35.850Z",
+      "token_hash": "7b3ebd9bb16fabc54fa2233cc719c8e48f9f1c4a5795ae9f4f711d0888b9194c",
+      "csrf_token": "58d7c9706801fd1a71f5feccb301a566467afc89f3c25a8e",
+      "expires_at": "2026-10-31T11:56:41.993Z",
       "ip_address": "127.0.0.1",
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "created_at": "2026-10-21T15:32:35.850Z"
+      "created_at": "2026-10-30T11:56:41.993Z"
     }
   ]
 }
