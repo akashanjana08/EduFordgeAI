@@ -1206,7 +1206,7 @@ export default function App() {
             className="w-full py-2 px-3 rounded border border-slate-700 hover:border-sky-500/60 bg-slate-900 text-slate-200 hover:text-white text-xs flex items-center justify-center gap-2 transition-colors min-h-[38px]"
           >
             <Code2 className="w-4 h-4 text-sky-400" />
-            <span>View Python / Streamlit Code</span>
+            {/* <span>View Python / Streamlit Code</span> */}
           </button>
         </div>
         </div>
