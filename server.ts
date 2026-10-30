@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 
 mountAuthAndSubscriptionRoutes(app);
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 function getGenAIClient(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -715,6 +715,12 @@ async function startServer() {
   } else {
     const distPath = path.resolve(process.cwd(), "dist");
     app.use(express.static(distPath));
+    app.use("/api", (_req, res) => {
+      res.status(404).json({
+        error: "API endpoint not found.",
+        code: "API_NOT_FOUND",
+      });
+    });
     app.get("*", (_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
@@ -725,4 +731,7 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch((error) => {
+  console.error("Failed to start EduForge AI server:", error);
+  process.exitCode = 1;
+});
