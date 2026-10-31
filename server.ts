@@ -1,6 +1,7 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
+import { randomUUID } from "crypto";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 import {
@@ -16,6 +17,37 @@ dotenv.config();
 
 const app = express();
 app.use(express.json({ limit: "12mb" }));
+
+// Render collects stdout/stderr as service logs. Keep request telemetry structured
+// and never log credentials, tokens, request bodies, or response bodies.
+app.use((req, res, next) => {
+  const requestId = randomUUID();
+  const startedAt = process.hrtime.bigint();
+  const originalUrl = req.originalUrl;
+
+  res.setHeader("X-Request-Id", requestId);
+  res.on("finish", () => {
+    const durationMs =
+      Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        type: "http_request",
+        requestId,
+        method: req.method,
+        path: originalUrl.split("?")[0],
+        status: res.statusCode,
+        durationMs: Math.round(durationMs * 100) / 100,
+        responseBytes: res.getHeader("content-length") || null,
+        userAgent: req.get("user-agent") || null,
+        ip: req.ip || null,
+      })
+    );
+  });
+
+  next();
+});
 
 // Security & CORS headers
 app.use((req, res, next) => {
