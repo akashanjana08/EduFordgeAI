@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import { QuestionSection, SchoolDetails, TemplateDefinition } from "../types";
 import { drawDiagramInPdf } from "./diagramRenderer";
+import { normalizeCodeForDisplay } from "./codeFormatting";
 
 export interface GeneratePdfInput {
   school: SchoolDetails;
@@ -243,6 +244,67 @@ function renderDocumentHeader(params: {
   return y;
 }
 
+function getCodeLines(doc: jsPDF, code: string, width: number): string[] {
+  const normalized = normalizeCodeForDisplay(code);
+  return normalized.split("\n").flatMap((line) => {
+    if (line.length === 0) return [""];
+    return doc.splitTextToSize(line, width) as string[];
+  });
+}
+
+function drawCodeBlock(params: {
+  doc: jsPDF;
+  code: string;
+  language?: string;
+  label: string;
+  x: number;
+  y: number;
+  width: number;
+  pageHeight: number;
+  bottomMargin: number;
+  onPageBreak: () => void;
+}): number {
+  const {
+    doc,
+    code,
+    x,
+    width,
+    pageHeight,
+    bottomMargin,
+    onPageBreak,
+  } = params;
+  const paddingX = 3;
+  const lineHeight = 3.8;
+  const lines = getCodeLines(doc, code, width - paddingX * 2);
+  let y = params.y;
+
+  if (y + lineHeight > pageHeight - bottomMargin) {
+    onPageBreak();
+    y = 18;
+  }
+  doc.setFont("courier", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(0, 0, 0);
+
+  for (const line of lines) {
+    if (y + lineHeight > pageHeight - bottomMargin) {
+      onPageBreak();
+      y = 18;
+      doc.setFont("courier", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(0, 0, 0);
+    }
+    doc.text(line, x + paddingX, y);
+    y += lineHeight;
+  }
+
+  return y + 3;
+}
+
+function estimateCodeBlockHeight(doc: jsPDF, code: string, width: number): number {
+  return 3 + getCodeLines(doc, code, width - 6).length * 3.8;
+}
+
 export function generateStudentQuestionPaperPdf(input: GeneratePdfInput): Blob {
   const {
     school,
@@ -378,12 +440,24 @@ export function generateStudentQuestionPaperPdf(input: GeneratePdfInput): Blob {
     }
 
     for (const q of section.questions) {
-      const stemText = `Q${qCounter}. ${q.question}`;
+      const stemText = `Q${qCounter}. ${q.question_text || q.question}`;
       const stemLines = doc.splitTextToSize(stemText, usableWidth - 16);
       const optLinesCount =
         q.type === "mcq" && q.options ? q.options.length * 4.2 : 0;
+      const codeHeight = q.code_snippet
+        ? estimateCodeBlockHeight(doc, q.code_snippet, usableWidth - 12)
+        : 0;
+      const sampleHeight = q.sample_input
+        ? estimateCodeBlockHeight(doc, q.sample_input, usableWidth - 12)
+        : 0;
       const diagHeight = q.type === "diagram" ? 48 : 0;
-      const blockHeight = stemLines.length * 4.3 + optLinesCount + diagHeight + 4;
+      const blockHeight =
+        stemLines.length * 4.3 +
+        optLinesCount +
+        codeHeight +
+        sampleHeight +
+        diagHeight +
+        8;
 
       // Avoid splitting a question across pages
       ensureSpace(blockHeight);
@@ -429,6 +503,34 @@ export function generateStudentQuestionPaperPdf(input: GeneratePdfInput): Blob {
           doc.text(optWrapped, marginX + 6, y);
           y += optWrapped.length * 4 + 0.4;
         });
+      }
+
+      for (const block of [
+        {
+          code: q.code_snippet,
+          label: "Code",
+          language: q.programming_language || q.language,
+        },
+        { code: q.sample_input, label: "Sample Input" },
+        { code: q.test_cases, label: "Test Cases" },
+      ]) {
+        if (!block.code) continue;
+        y = drawCodeBlock({
+          doc,
+          code: block.code,
+          language: block.language,
+          label: block.label,
+          x: marginX + 4,
+          y,
+          width: usableWidth - 8,
+          pageHeight,
+          bottomMargin: 20,
+          onPageBreak: () => {
+            doc.addPage();
+            y = 18;
+          },
+        });
+        y += 1;
       }
 
       y += template.compactSpacing ? 2 : 3.5;
@@ -530,7 +632,33 @@ export function generateAnswerKeyPdf(input: GeneratePdfInput): Blob {
         }`,
         usableWidth - 6
       );
-      const needed = (ansLines.length + solLines.length) * 4.2 + 10;
+      const codeHeight = q.code_snippet
+        ? estimateCodeBlockHeight(doc, q.code_snippet, usableWidth - 12)
+        : 0;
+      const sampleHeight = q.sample_input
+        ? estimateCodeBlockHeight(doc, q.sample_input, usableWidth - 12)
+        : 0;
+      const outputHeight = q.expected_output
+        ? estimateCodeBlockHeight(doc, q.expected_output, usableWidth - 12)
+        : 0;
+      const testCaseHeight = q.test_cases
+        ? estimateCodeBlockHeight(doc, q.test_cases, usableWidth - 12)
+        : 0;
+      const solutionCodeHeight = q.reference_solution
+        ? estimateCodeBlockHeight(doc, q.reference_solution, usableWidth - 12)
+        : 0;
+      const correctedCodeHeight = q.corrected_code
+        ? estimateCodeBlockHeight(doc, q.corrected_code, usableWidth - 12)
+        : 0;
+      const needed =
+        (ansLines.length + solLines.length) * 4.2 +
+        codeHeight +
+        sampleHeight +
+        outputHeight +
+        testCaseHeight +
+        solutionCodeHeight +
+        correctedCodeHeight +
+        14;
       ensureSpace(needed);
 
       doc.setFont("helvetica", "bold");
@@ -549,6 +677,45 @@ export function generateAnswerKeyPdf(input: GeneratePdfInput): Blob {
       doc.setTextColor(51, 65, 85);
       doc.text(solLines, marginX + 3, y);
       y += solLines.length * 4 + 3;
+
+      for (const block of [
+        {
+          code: q.code_snippet,
+          label: "Code",
+          language: q.programming_language || q.language,
+        },
+        { code: q.sample_input, label: "Sample Input" },
+        { code: q.expected_output, label: "Expected Output" },
+        { code: q.test_cases, label: "Test Cases" },
+        {
+          code: q.reference_solution,
+          label: "Reference Solution",
+          language: q.programming_language || q.language,
+        },
+        {
+          code: q.corrected_code,
+          label: "Corrected Code",
+          language: q.programming_language || q.language,
+        },
+      ]) {
+        if (!block.code) continue;
+        y = drawCodeBlock({
+          doc,
+          code: block.code,
+          language: block.language,
+          label: block.label,
+          x: marginX + 4,
+          y,
+          width: usableWidth - 8,
+          pageHeight,
+          bottomMargin: 20,
+          onPageBreak: () => {
+            doc.addPage();
+            y = 18;
+          },
+        });
+        y += 1;
+      }
 
       qCounter++;
     }

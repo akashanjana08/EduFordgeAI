@@ -6,6 +6,7 @@ import {
 } from "../types";
 import { DEFAULT_LOGO_SVG_DATA_URL } from "../services/validationAndTemplate";
 import { buildDiagramSvgDataUrl } from "../services/diagramRenderer";
+import { CodeBlock } from "./CodeBlock";
 
 interface PaperPreviewSheetProps {
   school: SchoolDetails;
@@ -154,7 +155,7 @@ export const PaperPreviewSheet: React.FC<PaperPreviewSheetProps> = ({
                         <span className="font-bold mr-1.5 tabular-nums">
                           Q{qNum}.
                         </span>
-                        <span>{q.question}</span>
+                        <span>{q.question_text || q.question}</span>
                       </div>
                       <span className="font-mono text-xs font-bold text-slate-900 shrink-0 tabular-nums">
                         [{q.marks}]
@@ -192,6 +193,27 @@ export const PaperPreviewSheet: React.FC<PaperPreviewSheetProps> = ({
                       </div>
                     )}
 
+                    {(q.code_snippet || q.sample_input || q.expected_output || q.schema) && (
+                      <div className="mt-2 ml-3 sm:ml-6 space-y-2 text-xs">
+                        {q.code_snippet && (
+                          <CodeBlock
+                            code={q.code_snippet}
+                            language={q.programming_language || q.language}
+                            label="Code"
+                          />
+                        )}
+                        {q.schema && (
+                          <div><span className="font-semibold">Schema:</span> {q.schema}</div>
+                        )}
+                        {q.sample_input && (
+                          <CodeBlock code={q.sample_input} language="text" label="Sample input" />
+                        )}
+                        {q.expected_output && viewMode === "answer_key" && (
+                          <CodeBlock code={q.expected_output} language="text" label="Expected output" />
+                        )}
+                      </div>
+                    )}
+
                     {/* Confidential Answer Key Details (Only shown in Answer Key mode) */}
                     {viewMode === "answer_key" && (
                       <div className="mt-2.5 ml-0 sm:ml-6 p-3 bg-emerald-50/70 border border-emerald-200 rounded text-xs space-y-1.5 break-words">
@@ -212,6 +234,13 @@ export const PaperPreviewSheet: React.FC<PaperPreviewSheetProps> = ({
                               Marking Scheme / Solution:{" "}
                             </span>
                             {q.solution || q.required_calculation}
+                          </p>
+                        )}
+                        {(q.time_complexity || q.space_complexity || q.key_concepts?.length) && (
+                          <p className="text-slate-700">
+                            {q.time_complexity && `Time: ${q.time_complexity} `}
+                            {q.space_complexity && `Space: ${q.space_complexity} `}
+                            {q.key_concepts?.length ? `Concepts: ${q.key_concepts.join(", ")}` : ""}
                           </p>
                         )}
                       </div>

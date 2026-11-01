@@ -1,10 +1,20 @@
 export type QuestionType =
   | "mcq"
   | "subjective"
+  | "fill_blank"
+  | "true_false"
+  | "match_following"
   | "diagram"
   | "numeric"
   | "derivation"
-  | "application";
+  | "application"
+  | "coding"
+  | "predict_output"
+  | "debugging"
+  | "sql_query"
+  | "code_explanation"
+  | "programming_mcq"
+  | "scenario_programming";
 
 export type SubjectiveSubtype = "short_answer" | "long_answer" | "descriptive";
 
@@ -25,6 +35,13 @@ export interface QuestionTypeConfig {
   difficulty: DifficultyLevel;
   numOptions: number;
   subjectiveSubtype?: SubjectiveSubtype;
+  technicalLanguage?: string;
+  technicalTopics?: string;
+  errorType?: "Syntax" | "Logical" | "Runtime";
+  sqlDialect?: "MySQL" | "PostgreSQL" | "SQL Server";
+  includeSampleInputOutput?: boolean;
+  includeTestCases?: boolean;
+  includeReferenceSolution?: boolean;
 }
 
 export interface SchoolDetails {
@@ -74,6 +91,7 @@ export interface Question {
   id: string;
   type: QuestionType;
   question: string;
+  question_text?: string;
   options?: string[];
   correct_answer?: string;
   marks: number;
@@ -85,6 +103,21 @@ export interface Question {
   required_calculation?: string;
   subjective_subtype?: SubjectiveSubtype;
   section_name?: string;
+  language?: string;
+  programming_language?: string;
+  input_format?: string;
+  output_format?: string;
+  constraints?: string[];
+  sample_input?: string;
+  expected_output?: string;
+  code_snippet?: string;
+  schema?: string;
+  time_complexity?: string;
+  space_complexity?: string;
+  key_concepts?: string[];
+  test_cases?: string;
+  reference_solution?: string;
+  corrected_code?: string;
 }
 
 export interface QuestionSection {
@@ -245,4 +278,3 @@ export interface AccessEvaluation {
   limitThisMonth: number | null;
   maxQuestionsPerPaper: number | null;
 }
-

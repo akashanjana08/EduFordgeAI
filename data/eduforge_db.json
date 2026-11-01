@@ -4,7 +4,7 @@
       "id": "usr_owner_001",
       "username": "Akash00894",
       "email": "akash00894@eduforge.ai",
-      "password_hash": "$2b$12$XdnTQEStDHNfh5cR0Q.ALeYQZuzqUsmUyO83pX4ViVQh9CcVRJ3Y.",
+      "password_hash": "$2b$12$XKLIKqQC778P8KMgQ4YgxeEoQjuHlUbQn7wzR30ixHDM1cT1z3u/6",
       "role": "OWNER",
       "status": "ACTIVE",
       "failed_login_attempts": 0,
@@ -12,7 +12,7 @@
       "reset_token_hash": null,
       "reset_token_expires_at": null,
       "created_at": "2026-09-01T08:00:00.000Z",
-      "updated_at": "2026-10-30T13:01:14.236Z"
+      "updated_at": "2026-11-01T17:29:21.408Z"
     },
     {
       "id": "usr_admin_002",
@@ -271,6 +271,175 @@
   ],
   "usage_records": [
     {
+      "id": "use_04affdb0c0fc",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 2,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 4,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T17:30:05.152Z"
+    },
+    {
+      "id": "use_fe2fb1107112",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 2,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 4,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T17:25:55.730Z"
+    },
+    {
+      "id": "use_95a112ef6a9a",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 2,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 4,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T17:23:02.897Z"
+    },
+    {
+      "id": "use_37e2ebf3b2a6",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 2,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 4,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T17:15:56.984Z"
+    },
+    {
+      "id": "use_420961628744",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 2,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 4,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T17:15:44.117Z"
+    },
+    {
+      "id": "use_65b6556a5862",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 2,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 4,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T17:15:04.543Z"
+    },
+    {
+      "id": "use_a4a6267cea54",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 2,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 4,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T17:05:52.041Z"
+    },
+    {
+      "id": "use_4b2a90df0310",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 6,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 16,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T17:03:30.518Z"
+    },
+    {
+      "id": "use_7a71ab75fab0",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 6,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 16,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T16:42:12.773Z"
+    },
+    {
+      "id": "use_12cf5b01668f",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 4,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 12,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T16:34:24.424Z"
+    },
+    {
+      "id": "use_7e9ea3635e25",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 7,
+      "subject": "Programming Language",
+      "class_name": "Grade 10",
+      "maximum_marks": 20,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T16:32:55.541Z"
+    },
+    {
+      "id": "use_0e38d60737d7",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 11,
+      "subject": "Computer Science",
+      "class_name": "Grade 10",
+      "maximum_marks": 21,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T16:17:08.146Z"
+    },
+    {
+      "id": "use_dae4ce07818d",
+      "user_id": "usr_owner_001",
+      "subscription_id": null,
+      "action_type": "GENERATE_PAPER",
+      "question_count": 9,
+      "subject": "Computer Science",
+      "class_name": "Grade 10",
+      "maximum_marks": 17,
+      "billing_period_key": "2026-11",
+      "bypassed_by_owner": true,
+      "created_at": "2026-11-01T16:16:03.085Z"
+    },
+    {
       "id": "use_13e717c10510",
       "user_id": "usr_owner_001",
       "subscription_id": null,
@@ -441,6 +610,42 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "aud_ef29b608e4a3",
+      "actor_user_id": "usr_owner_001",
+      "actor_username": "Akash00894",
+      "actor_role": "OWNER",
+      "action": "USER_LOGIN_SUCCESS",
+      "target_type": "Users",
+      "target_id": "usr_owner_001",
+      "details": "Authenticated Akash00894 with role=OWNER (OWNER subscription exemption active).",
+      "ip_address": "127.0.0.1",
+      "created_at": "2026-11-01T17:04:47.505Z"
+    },
+    {
+      "id": "aud_5805cdcc4597",
+      "actor_user_id": "usr_owner_001",
+      "actor_username": "Akash00894",
+      "actor_role": "OWNER",
+      "action": "USER_LOGOUT",
+      "target_type": "Sessions",
+      "target_id": "ses_91088035c73a",
+      "details": "User Akash00894 logged out.",
+      "ip_address": null,
+      "created_at": "2026-11-01T17:04:37.126Z"
+    },
+    {
+      "id": "aud_50a7ea0f6689",
+      "actor_user_id": "usr_owner_001",
+      "actor_username": "Akash00894",
+      "actor_role": "OWNER",
+      "action": "USER_LOGIN_SUCCESS",
+      "target_type": "Users",
+      "target_id": "usr_owner_001",
+      "details": "Authenticated Akash00894 with role=OWNER (OWNER subscription exemption active).",
+      "ip_address": "127.0.0.1",
+      "created_at": "2026-11-01T15:50:46.459Z"
+    },
     {
       "id": "aud_6727af204e29",
       "actor_user_id": "usr_owner_001",
@@ -804,6 +1009,16 @@
       "ip_address": "127.0.0.1",
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
       "created_at": "2026-10-30T11:56:41.993Z"
+    },
+    {
+      "id": "ses_168113ff9f05",
+      "user_id": "usr_owner_001",
+      "token_hash": "263461b278fe99596a2b79eebaad179671521a15864cf19ae680879195535862",
+      "csrf_token": "3c1347147133d49b12db7f1193249639c931aa5f6f58f41e",
+      "expires_at": "2026-11-02T17:04:47.504Z",
+      "ip_address": "127.0.0.1",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "created_at": "2026-11-01T17:04:47.504Z"
     }
   ]
 }

@@ -99,6 +99,7 @@ const SUBJECTS = [
   "Hindi",
   "Social Science",
   "Computer Science",
+  "Programming Language",
   "History",
   "Geography",
   "Economics",
@@ -106,6 +107,31 @@ const SUBJECTS = [
   "Accountancy",
   "General Knowledge",
   "Custom Subject",
+];
+
+const TECHNICAL_TYPES = new Set([
+  "coding",
+  "predict_output",
+  "debugging",
+  "sql_query",
+  "programming_mcq",
+  "code_explanation",
+  "scenario_programming",
+]);
+
+const PROGRAMMING_LANGUAGES = [
+  "Python",
+  "JavaScript",
+  "TypeScript",
+  "Java",
+  "C",
+  "C++",
+  "C#",
+  "PHP",
+  "Go",
+  "Ruby",
+  "Kotlin",
+  "Swift",
 ];
 
 const GEMINI_MODELS = [
@@ -386,6 +412,15 @@ export default function App() {
       ? customSubjectName.trim() || "Mathematics"
       : selectedSubjectOption;
 
+  const isProgrammingSubject = resolvedSubject === "Programming Language";
+  const effectiveTypeConfigs = useMemo(
+    () =>
+      typeConfigs.filter(
+        (config) => isProgrammingSubject || !TECHNICAL_TYPES.has(config.questionType)
+      ),
+    [isProgrammingSubject, typeConfigs]
+  );
+
   const parsedTopics = useMemo(() => parseTopicsInput(rawTopics), [rawTopics]);
 
   const activeTemplate: TemplateDefinition = useMemo(() => {
@@ -400,29 +435,29 @@ export default function App() {
 
   const configuredMarksTotal = useMemo(
     () =>
-      typeConfigs
+      effectiveTypeConfigs
         .filter((c) => c.enabled)
         .reduce((sum, c) => sum + c.count * c.marksPerQuestion, 0),
-    [typeConfigs]
+    [effectiveTypeConfigs]
   );
 
   const configuredQuestionsTotal = useMemo(
     () =>
-      typeConfigs
+      effectiveTypeConfigs
         .filter((c) => c.enabled)
         .reduce((sum, c) => sum + c.count, 0),
-    [typeConfigs]
+    [effectiveTypeConfigs]
   );
 
   const validation = useMemo(
     () =>
       validateQuestionPaper({
         maximumMarks,
-        typeConfigs,
+        typeConfigs: effectiveTypeConfigs,
         mixedDistribution,
         questions,
       }),
-    [maximumMarks, typeConfigs, mixedDistribution, questions]
+    [maximumMarks, effectiveTypeConfigs, mixedDistribution, questions]
   );
 
   const mappedSections = useMemo(
@@ -709,7 +744,7 @@ export default function App() {
           allowBroadSyllabus,
           globalDifficulty,
           mixedDistribution,
-          typeConfigs,
+          typeConfigs: effectiveTypeConfigs,
           llmConfig,
         }),
       });
@@ -804,7 +839,7 @@ export default function App() {
     }
 
     const [rasterizedLogo, diagramImagesByQuestionId] = await Promise.all([
-      rasterizeLogoToPngDataUrl(schoolDetails.logoDataUrl),
+      rasterizeLogoToPngDataUrl(schoolDetails.logoDataUrl || undefined),
       rasterizeAllQuestionDiagrams(questions),
     ]);
     const resolvedLogoPngDataUrl =
@@ -1600,7 +1635,19 @@ export default function App() {
                     </label>
                     <select
                       value={selectedSubjectOption}
-                      onChange={(e) => setSelectedSubjectOption(e.target.value)}
+                      onChange={(e) => {
+                        const nextSubject = e.target.value;
+                        setSelectedSubjectOption(nextSubject);
+                        if (nextSubject !== "Programming Language") {
+                          setTypeConfigs((current) =>
+                            current.map((config) =>
+                              TECHNICAL_TYPES.has(config.questionType)
+                                ? { ...config, enabled: false }
+                                : config
+                            )
+                          );
+                        }
+                      }}
                       className="w-full rounded-md border border-slate-300 px-3 py-2 sm:py-1.5 text-xs"
                     >
                       {SUBJECTS.map((s) => (
@@ -1689,7 +1736,7 @@ export default function App() {
                 </div>
 
                 <div className="space-y-3">
-                  {typeConfigs.map((cfg, idx) => (
+                  {effectiveTypeConfigs.map((cfg) => (
                     <div
                       key={cfg.questionType}
                       className={`p-3.5 rounded-md border transition-colors ${
@@ -1705,12 +1752,13 @@ export default function App() {
                               type="checkbox"
                               checked={cfg.enabled}
                               onChange={(e) => {
-                                const next = [...typeConfigs];
-                                next[idx] = {
-                                  ...cfg,
-                                  enabled: e.target.checked,
-                                };
-                                setTypeConfigs(next);
+                                setTypeConfigs((current) =>
+                                  current.map((config) =>
+                                    config.questionType === cfg.questionType
+                                      ? { ...config, enabled: e.target.checked }
+                                      : config
+                                  )
+                                );
                               }}
                               className="w-4 h-4 rounded border-slate-300 text-sky-600"
                             />
@@ -1738,12 +1786,13 @@ export default function App() {
                             disabled={!cfg.enabled}
                             value={cfg.count}
                             onChange={(e) => {
-                              const next = [...typeConfigs];
-                              next[idx] = {
-                                ...cfg,
-                                count: Math.max(1, Number(e.target.value)),
-                              };
-                              setTypeConfigs(next);
+                              setTypeConfigs((current) =>
+                                current.map((config) =>
+                                  config.questionType === cfg.questionType
+                                    ? { ...config, count: Math.max(1, Number(e.target.value)) }
+                                    : config
+                                )
+                              );
                             }}
                             className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 lg:py-1 text-xs font-mono"
                           />
@@ -1760,15 +1809,13 @@ export default function App() {
                             disabled={!cfg.enabled}
                             value={cfg.marksPerQuestion}
                             onChange={(e) => {
-                              const next = [...typeConfigs];
-                              next[idx] = {
-                                ...cfg,
-                                marksPerQuestion: Math.max(
-                                  1,
-                                  Number(e.target.value)
-                                ),
-                              };
-                              setTypeConfigs(next);
+                              setTypeConfigs((current) =>
+                                current.map((config) =>
+                                  config.questionType === cfg.questionType
+                                    ? { ...config, marksPerQuestion: Math.max(1, Number(e.target.value)) }
+                                    : config
+                                )
+                              );
                             }}
                             className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 lg:py-1 text-xs font-mono"
                           />
@@ -1782,12 +1829,13 @@ export default function App() {
                             disabled={!cfg.enabled}
                             value={cfg.difficulty}
                             onChange={(e) => {
-                              const next = [...typeConfigs];
-                              next[idx] = {
-                                ...cfg,
-                                difficulty: e.target.value as DifficultyLevel,
-                              };
-                              setTypeConfigs(next);
+                              setTypeConfigs((current) =>
+                                current.map((config) =>
+                                  config.questionType === cfg.questionType
+                                    ? { ...config, difficulty: e.target.value as DifficultyLevel }
+                                    : config
+                                )
+                              );
                             }}
                             className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 lg:py-1 text-xs"
                           >
@@ -1811,12 +1859,13 @@ export default function App() {
                                 disabled={!cfg.enabled}
                                 value={cfg.numOptions}
                                 onChange={(e) => {
-                                  const next = [...typeConfigs];
-                                  next[idx] = {
-                                    ...cfg,
-                                    numOptions: Number(e.target.value),
-                                  };
-                                  setTypeConfigs(next);
+                                  setTypeConfigs((current) =>
+                                    current.map((config) =>
+                                      config.questionType === cfg.questionType
+                                        ? { ...config, numOptions: Number(e.target.value) }
+                                        : config
+                                    )
+                                  );
                                 }}
                                 className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 lg:py-1 text-xs font-mono"
                               />
@@ -1831,13 +1880,13 @@ export default function App() {
                                 disabled={!cfg.enabled}
                                 value={cfg.subjectiveSubtype || "short_answer"}
                                 onChange={(e) => {
-                                  const next = [...typeConfigs];
-                                  next[idx] = {
-                                    ...cfg,
-                                    subjectiveSubtype: e.target
-                                      .value as SubjectiveSubtype,
-                                  };
-                                  setTypeConfigs(next);
+                                  setTypeConfigs((current) =>
+                                    current.map((config) =>
+                                      config.questionType === cfg.questionType
+                                        ? { ...config, subjectiveSubtype: e.target.value as SubjectiveSubtype }
+                                        : config
+                                    )
+                                  );
                                 }}
                                 className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 lg:py-1 text-xs"
                               >
@@ -1859,6 +1908,26 @@ export default function App() {
                             : "0"}
                         </div>
                       </div>
+                      {isProgrammingSubject &&
+                        cfg.enabled &&
+                        TECHNICAL_TYPES.has(cfg.questionType) && (
+                          <div className="col-span-2 sm:col-span-4 lg:col-span-12 mt-1 grid grid-cols-2 sm:grid-cols-4 gap-2 border-t border-slate-200 pt-3">
+                            <label className="text-[11px] text-slate-600">Programming language
+                              <select value={cfg.technicalLanguage || "Python"} onChange={(e) => setTypeConfigs((current) => current.map((config) => config.questionType === cfg.questionType ? { ...config, technicalLanguage: e.target.value } : config))} className="mt-0.5 w-full rounded border border-slate-300 px-2 py-1 text-xs">
+                                {PROGRAMMING_LANGUAGES.map((language) => <option key={language}>{language}</option>)}
+                              </select>
+                            </label>
+                            <label className="text-[11px] text-slate-600">Technical topics
+                              <input value={cfg.technicalTopics || ""} onChange={(e) => setTypeConfigs((current) => current.map((config) => config.questionType === cfg.questionType ? { ...config, technicalTopics: e.target.value } : config))} className="mt-0.5 w-full rounded border border-slate-300 px-2 py-1 text-xs" placeholder="Loops, Functions" />
+                            </label>
+                            {cfg.questionType === "debugging" && <label className="text-[11px] text-slate-600">Error type
+                              <select value={cfg.errorType || "Logical"} onChange={(e) => setTypeConfigs((current) => current.map((config) => config.questionType === cfg.questionType ? { ...config, errorType: e.target.value as QuestionTypeConfig["errorType"] } : config))} className="mt-0.5 w-full rounded border border-slate-300 px-2 py-1 text-xs"><option>Syntax</option><option>Logical</option><option>Runtime</option></select>
+                            </label>}
+                            {cfg.questionType === "coding" && <div className="col-span-2 sm:col-span-4 flex flex-wrap gap-3 text-[11px] text-slate-600">
+                              {([["includeSampleInputOutput", "Sample input/output"], ["includeTestCases", "Test cases"], ["includeReferenceSolution", "Reference solution"]] as const).map(([key, label]) => <label key={key} className="flex items-center gap-1"><input type="checkbox" checked={Boolean(cfg[key])} onChange={(e) => setTypeConfigs((current) => current.map((config) => config.questionType === cfg.questionType ? { ...config, [key]: e.target.checked } : config))} />{label}</label>)}
+                            </div>}
+                          </div>
+                        )}
                     </div>
                   ))}
                 </div>
@@ -2121,6 +2190,7 @@ export default function App() {
       </div>
     );
 
+
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 pb-16 md:pb-0">
       {/* Top Authenticated Platform Bar with Route Navigation */}
@@ -2164,6 +2234,7 @@ export default function App() {
                 <Sparkles className="w-3.5 h-3.5 shrink-0" />
                 <span>Question Paper Generator</span>
               </button>
+
 
               <button
                 onClick={() => navigate("/subscription")}

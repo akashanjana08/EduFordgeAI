@@ -498,7 +498,7 @@ export const QuestionsEditorTab: React.FC<QuestionsEditorTabProps> = ({
               ) : (
                 <div className="space-y-2">
                   <p className="text-sm text-slate-900 leading-relaxed">
-                    {q.question}
+                    {q.question_text || q.question}
                   </p>
 
                   {q.type === "diagram" && (

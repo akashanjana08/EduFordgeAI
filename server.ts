@@ -146,11 +146,15 @@ function buildQuestionArraySchema(questionType?: string) {
     id: { type: Type.STRING, description: "Sequential ID like Q001" },
     type: {
       type: Type.STRING,
-      description: "mcq, subjective, diagram, numeric, derivation, or application",
+      description: "Academic or technical question type selected by the user",
     },
     question: {
       type: Type.STRING,
       description: "Concise student-facing examination question text (max 350 chars)",
+    },
+    question_text: {
+      type: Type.STRING,
+      description: "Question statement only. Never include source code or expected output.",
     },
     correct_answer: {
       type: Type.STRING,
@@ -169,6 +173,21 @@ function buildQuestionArraySchema(questionType?: string) {
       type: Type.STRING,
       description: "Concise 2-4 step marking scheme for the Answer Key (max 400 chars, no repeating decimals)",
     },
+    language: { type: Type.STRING },
+    programming_language: { type: Type.STRING },
+    input_format: { type: Type.STRING },
+    output_format: { type: Type.STRING },
+    constraints: { type: Type.ARRAY, items: { type: Type.STRING } },
+    sample_input: { type: Type.STRING },
+    expected_output: { type: Type.STRING },
+    code_snippet: { type: Type.STRING },
+    schema: { type: Type.STRING },
+    time_complexity: { type: Type.STRING },
+    space_complexity: { type: Type.STRING },
+    key_concepts: { type: Type.ARRAY, items: { type: Type.STRING } },
+    test_cases: { type: Type.STRING },
+    reference_solution: { type: Type.STRING },
+    corrected_code: { type: Type.STRING },
   };
 
   const required = [
@@ -191,6 +210,7 @@ function buildQuestionArraySchema(questionType?: string) {
     if (questionType === "mcq") {
       required.push("options");
     }
+
   }
 
   if (questionType === "diagram") {
@@ -230,6 +250,68 @@ function clampString(val: unknown, maxLen = 600): string {
   // Collapse any degenerate character/word repetition loops
   const collapsed = val.replace(/(.)\1{15,}/g, "$1$1$1").replace(/(\b\S+\b)(?:\s+\1){5,}/g, "$1");
   return collapsed.length > maxLen ? collapsed.slice(0, maxLen).trim() + "..." : collapsed.trim();
+}
+
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'");
+}
+
+function normalizeTechnicalContent(params: {
+  rawQuestion: string;
+  rawQuestionText: unknown;
+  rawCode: unknown;
+  questionType: string;
+}): { questionText: string; codeSnippet?: string } {
+  const explicitText = decodeHtmlEntities(
+    clampString(params.rawQuestionText, 500)
+  );
+  const explicitCode = decodeHtmlEntities(clampString(params.rawCode, 5000));
+  if (explicitCode) {
+    return {
+      questionText: explicitText || decodeHtmlEntities(params.rawQuestion),
+      codeSnippet: explicitCode,
+    };
+  }
+
+  const raw = decodeHtmlEntities(params.rawQuestion);
+  const isTechnical = [
+    "coding",
+    "predict_output",
+    "debugging",
+    "programming_mcq",
+    "code_explanation",
+    "scenario_programming",
+    "sql_query",
+  ].includes(params.questionType);
+  if (!isTechnical) return { questionText: raw };
+
+  const marker =
+    /(?:following\s+(?:[\w+#.-]+\s+)?code\s*:?\s*|code\s+snippet\s*:?\s*|query\s*:?\s*)(?=(?:#include|public\s+class|class\s+\w+|function\s+\w+|const\s+\w+\s*=|let\s+\w+\s*=|select\s+|with\s+\w+\s+as|import\s+[\w{]|def\s+\w+\s*\())/i;
+  const markerMatch = raw.match(marker);
+  const firstCode = raw.search(
+    /(?:#include\b|public\s+class\b|class\s+\w+\s*\{|function\s+\w+\s*\(|(?:const|let|var)\s+\w+\s*=|^\s*(?:select|with)\s+|^\s*def\s+\w+\s*\()/im
+  );
+  const splitAt = markerMatch?.index !== undefined
+    ? markerMatch.index + markerMatch[0].length
+    : firstCode > 0
+    ? firstCode
+    : -1;
+  if (splitAt <= 0 || splitAt >= raw.length) {
+    return { questionText: explicitText || raw };
+  }
+
+  const questionText = (explicitText || raw.slice(0, splitAt))
+    .replace(/(?:code\s*:?\s*)$/i, "")
+    .trim();
+  const codeSnippet = raw.slice(splitAt).trim();
+  return codeSnippet
+    ? { questionText, codeSnippet }
+    : { questionText: explicitText || raw };
 }
 
 function parseQuestionsJsonSafely(rawText: string): any[] {
@@ -337,10 +419,11 @@ async function callGeminiForQuestionsWithRetry(params: {
   temperature: number;
   questionType?: string;
   maxOutputTokens?: number;
+  schema?: Record<string, unknown>;
 }): Promise<any[]> {
   const ai = getGenAIClient();
   let lastError: unknown;
-  const schema = buildQuestionArraySchema(params.questionType);
+  const schema = params.schema || buildQuestionArraySchema(params.questionType);
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -406,8 +489,23 @@ const handleGenerateQuestionPaperRequest = async (
       llmConfig,
     } = req.body;
 
+    const technicalTypes = new Set([
+      "coding",
+      "predict_output",
+      "debugging",
+      "sql_query",
+      "programming_mcq",
+      "code_explanation",
+      "scenario_programming",
+    ]);
+    const isProgrammingSubject = subject === "Programming Language";
     const enabledConfigs = Array.isArray(typeConfigs)
-      ? typeConfigs.filter((c: any) => c.enabled && c.count > 0)
+      ? typeConfigs.filter(
+          (c: any) =>
+            c.enabled &&
+            c.count > 0 &&
+            (isProgrammingSubject || !technicalTypes.has(c.questionType))
+        )
       : [];
 
     if (enabledConfigs.length === 0) {
@@ -471,6 +569,13 @@ const handleGenerateQuestionPaperRequest = async (
           marksPerQuestion: Number(tc.marksPerQuestion),
           numOptions: tc.questionType === "mcq" ? Number(tc.numOptions || 4) : 0,
           difficulty: diffSpec,
+          technicalLanguage: tc.technicalLanguage || "",
+          technicalTopics: tc.technicalTopics || "",
+          errorType: tc.errorType || "",
+          sqlDialect: tc.sqlDialect || "",
+          includeSampleInputOutput: Boolean(tc.includeSampleInputOutput),
+          includeTestCases: Boolean(tc.includeTestCases),
+          includeReferenceSolution: Boolean(tc.includeReferenceSolution),
           startId,
           avoidExistingQuestions: allQuestions
             .map((q) => q.question)
@@ -487,7 +592,11 @@ const handleGenerateQuestionPaperRequest = async (
           userConfigPayload.subject
         }, each worth ${
           tc.marksPerQuestion
-        } mark(s), starting at ID ${startId}. Keep solutions concise (2-4 brief steps, max 350 chars) and round any decimal numbers to 2 decimal places.`;
+        } mark(s), starting at ID ${startId}. Keep solutions concise (2-4 brief steps, max 350 chars) and round any decimal numbers to 2 decimal places. For technical types, return question_text as the statement only, code_snippet as source code only, programming_language as the selected language, and expected_output as output only. Never put code or output in question_text. Preserve code indentation, blank lines, and special characters. Return language-specific fields such as code_snippet, sample_input, expected_output, input_format, output_format, constraints, schema, time_complexity, space_complexity, and key_concepts. Only include solution/reference fields when the selected configuration permits them. ${
+          isProgrammingSubject && technicalTypes.has(tc.questionType)
+            ? `Use exactly the selected programming language "${tc.technicalLanguage || "Python"}" for this question type. Do not substitute another language.`
+            : ""
+        }`;
 
         const items = await callGeminiForQuestionsWithRetry({
           model,
@@ -501,12 +610,17 @@ const handleGenerateQuestionPaperRequest = async (
           const src = items[i] || items[items.length - 1] || {};
           const qId = `Q${String(nextIdNum).padStart(3, "0")}`;
           nextIdNum++;
+          const normalizedContent = normalizeTechnicalContent({
+            rawQuestion: clampString(src.question, 500) || `Question ${qId} on ${safeTopics[0] || subject}`,
+            rawQuestionText: src.question_text,
+            rawCode: src.code_snippet,
+            questionType: tc.questionType,
+          });
           allQuestions.push({
             id: qId,
             type: tc.questionType,
-            question:
-              clampString(src.question, 500) ||
-              `Question ${qId} on ${safeTopics[0] || subject}`,
+            question: normalizedContent.questionText,
+            question_text: normalizedContent.questionText,
             options:
               tc.questionType === "mcq"
                 ? Array.isArray(src.options) && src.options.length >= 4
@@ -532,6 +646,37 @@ const handleGenerateQuestionPaperRequest = async (
             solution:
               clampString(src.solution || src.required_calculation, 600) ||
               "Award full marks for complete logical steps.",
+            language: clampString(src.language, 80) || tc.technicalLanguage || undefined,
+            programming_language:
+              clampString(src.programming_language, 80) ||
+              clampString(src.language, 80) ||
+              tc.technicalLanguage ||
+              undefined,
+            input_format: clampString(src.input_format, 500) || undefined,
+            output_format: clampString(src.output_format, 500) || undefined,
+            constraints: Array.isArray(src.constraints)
+              ? src.constraints.map((v: unknown) => clampString(v, 200)).filter(Boolean)
+              : undefined,
+            sample_input: tc.includeSampleInputOutput
+              ? clampString(src.sample_input, 1000) || undefined
+              : undefined,
+            expected_output: tc.includeSampleInputOutput
+              ? clampString(src.expected_output, 1000) || undefined
+              : undefined,
+            code_snippet: normalizedContent.codeSnippet,
+            schema: clampString(src.schema, 1500) || undefined,
+            time_complexity: clampString(src.time_complexity, 120) || undefined,
+            space_complexity: clampString(src.space_complexity, 120) || undefined,
+            key_concepts: Array.isArray(src.key_concepts)
+              ? src.key_concepts.map((v: unknown) => clampString(v, 120)).filter(Boolean)
+              : undefined,
+            test_cases: tc.includeTestCases
+              ? clampString(src.test_cases, 5000) || undefined
+              : undefined,
+            reference_solution: tc.includeReferenceSolution
+              ? clampString(src.reference_solution, 5000) || undefined
+              : undefined,
+            corrected_code: clampString(src.corrected_code, 5000) || undefined,
             diagram_description:
               tc.questionType === "diagram"
                 ? clampString(src.diagram_description, 350) ||
@@ -621,7 +766,7 @@ app.post(
       questionType: targetQuestion.type,
       marks: targetQuestion.marks,
       difficulty: targetQuestion.difficulty,
-      replaceQuestion: targetQuestion.question,
+      replaceQuestion: targetQuestion.question_text || targetQuestion.question,
       avoidQuestions: (Array.isArray(existingQuestions) ? existingQuestions : []).slice(0, 20),
     };
 
@@ -633,7 +778,7 @@ app.post(
       targetQuestion.id
     }', type '${targetQuestion.type}', and marks ${
       targetQuestion.marks
-    }. Make it completely distinct from 'replaceQuestion' and 'avoidQuestions'. Keep the solution concise (max 350 chars).`;
+    }. Make it completely distinct from 'replaceQuestion' and 'avoidQuestions'. For technical types, return question_text separately from code_snippet and preserve all code newlines and indentation. Keep the solution concise (max 350 chars).`;
 
     const items = await callGeminiForQuestionsWithRetry({
       model,
@@ -657,10 +802,25 @@ app.post(
       maximumMarks: Number(targetQuestion.marks) || 1,
     });
 
+    const normalizedReplacement = normalizeTechnicalContent({
+      rawQuestion: clampString(item.question, 500) || targetQuestion.question,
+      rawQuestionText: item.question_text,
+      rawCode: item.code_snippet,
+      questionType: targetQuestion.type,
+    });
+
     res.json({
       question: {
         ...targetQuestion,
-        question: clampString(item.question, 500) || targetQuestion.question,
+        question: normalizedReplacement.questionText,
+        question_text: normalizedReplacement.questionText,
+        code_snippet:
+          normalizedReplacement.codeSnippet || targetQuestion.code_snippet,
+        programming_language:
+          clampString(item.programming_language, 80) ||
+          clampString(item.language, 80) ||
+          targetQuestion.programming_language ||
+          targetQuestion.language,
         options:
           targetQuestion.type === "mcq"
             ? Array.isArray(item.options) && item.options.length >= 4
